@@ -91,6 +91,54 @@ public:
         return len();
     }
 
+    // Очищает строку.
+    void erase()
+    {
+        if (str != nullptr)
+            str[0] = '\0';
+    }
+
+    // Заменяет count символов, начиная с pos, строкой newText.
+    void replace(int pos, int count, const char* newText)
+    {
+        int oldLength = len();
+
+        if (pos < 0 || pos > oldLength || count < 0)
+            return;
+
+        if (count > oldLength - pos)
+            count = oldLength - pos;
+
+        if (newText == nullptr)
+            newText = "";
+
+        int textLength = static_cast<int>(std::strlen(newText));
+        int newLength = oldLength - count + textLength;
+        char* newStr = new char[newLength + 1];
+
+        for (int i = 0; i < pos; ++i)
+            newStr[i] = str[i];
+
+        for (int i = 0; i < textLength; ++i)
+            newStr[pos + i] = newText[i];
+
+        for (int i = pos + count; i < oldLength; ++i)
+            newStr[pos + textLength + i - pos - count] = str[i];
+
+        newStr[newLength] = '\0';
+        delete[] str;
+        str = newStr;
+    }
+
+    // Возвращает символ по индексу. Если индекс неправильный, возвращает '\0'.
+    char at(int index) const
+    {
+        if (index < 0 || index >= len())
+            return '\0';
+
+        return str[index];
+    }
+
     void reverse()
     {
         if (str == nullptr)
@@ -127,17 +175,34 @@ int main()
     std::cin.getline(input, 256);
 
     MyString first(input);
-    MyString empty;
-    MyString copy(first);
-    MyString moved(std::move(copy));
-
     std::cout << "Введённая строка: " << first.c_str() << '\n';
     std::cout << "Длина строки: " << first.length() << '\n';
-    std::cout << "Пустая ли строка empty: " << (empty.isEmpty() ? "да" : "нет") << '\n';
 
-    moved.reverse();
-    std::cout << "Копия строки в обратном порядке: " << moved.c_str() << '\n';
-    std::cout << "Живых объектов MyString: " << MyString::getObjectCount() << '\n';
+    int pos;
+    int count;
+    char replacement[256];
+    std::cout << "Введите позицию для замены: ";
+    std::cin >> pos;
+    std::cout << "Сколько символов заменить: ";
+    std::cin >> count;
+    std::cin.ignore(10000, '\n');
+    std::cout << "Введите текст для вставки: ";
+    std::cin.getline(replacement, 256);
+
+    first.replace(pos, count, replacement);
+    std::cout << "Строка после replace: " << first.c_str() << '\n';
+
+    std::cout << "Введите индекс символа: ";
+    int index;
+    std::cin >> index;
+    char symbol = first.at(index);
+    if (symbol == '\0')
+        std::cout << "Такого символа нет.\n";
+    else
+        std::cout << "Символ по индексу: " << symbol << '\n';
+
+    first.erase();
+    std::cout << "Строка после erase: " << first.c_str() << '\n';
 
     return 0;
 }
